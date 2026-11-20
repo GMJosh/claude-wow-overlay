@@ -8,7 +8,7 @@ more useful than a text description.
 
 ## Download
 
-**[⬇ Download the installer](https://github.com/BabyGrug/claude-wow-overlay/releases/latest/download/ClaudeWowOverlaySetup.exe)**
+**[⬇ Download the installer](https://github.com/GMJosh/claude-wow-overlay/releases/latest/download/ClaudeWowOverlaySetup.exe)**
 
 Run it and follow the setup wizard — a couple of minutes, mostly automatic.
 

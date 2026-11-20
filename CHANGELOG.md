@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.2.9
+- Fix setup (and the app itself) saying it couldn't find the Claude Windows
+  app. Newer versions of the Claude desktop app keep their command-line
+  tool in a different place (`%LOCALAPPDATA%\Claude-Data\...`, with an extra
+  folder level), so the old search came up empty even though Claude was
+  installed and working. Both the installer and the app now look there
+  first and still fall back to the older locations.
+- The project moved to a new GitHub home (`GMJosh/claude-wow-overlay`) and
+  the in-app updater now checks there. Copies older than v1.2.9 still check
+  the old location, so they won't see this update on their own -- download
+  the new installer once and later updates work normally.
+
 ## v1.2.8
 - Only one copy of the app can run at a time. Launching it again while it's
   already running now brings the existing window forward instead of starting

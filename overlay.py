@@ -238,7 +238,7 @@ def ack_show_request():
 
 WINDOW_W, WINDOW_H = 460, 360
 
-APP_VERSION = "1.2.8"
+APP_VERSION = "1.2.9"
 
 
 def _icon_path():
@@ -330,7 +330,7 @@ def save_settings(settings: dict):
 def format_hotkey_display(hotkey: str) -> str:
     """"ctrl+shift+s" -> "Ctrl+Shift+S" """
     return "+".join(part.capitalize() for part in hotkey.split("+"))
-UPDATE_REPO = "BabyGrug/claude-wow-overlay"
+UPDATE_REPO = "GMJosh/claude-wow-overlay"
 UPDATE_CHECK_URL = f"https://api.github.com/repos/{UPDATE_REPO}/releases/latest"
 UPDATE_ASSET_NAME = "ClaudeWowOverlaySetup.exe"
 # This app is meant to run continuously through a whole WoW session (and
@@ -1001,22 +1001,36 @@ def find_claude_exe() -> str:
     localappdata = os.environ.get("LOCALAPPDATA", "")
     appdata = os.environ.get("APPDATA", "")
     patterns = [
+        # Newer desktop app builds: ...\Claude-Data\<pkg>\claude-code\<ver>\<hash>\claude.exe
+        os.path.join(localappdata, "Claude-Data", "*", "claude-code", "*",
+                     "*", "claude.exe"),
+        os.path.join(localappdata, "Claude-Data", "*", "claude-code", "*",
+                     "claude.exe"),
+        # Older MSIX layouts
         os.path.join(localappdata, "Packages", "*Claude*", "LocalCache",
                      "Roaming", "Claude", "claude-code", "*", "claude.exe"),
+        os.path.join(localappdata, "Packages", "*Claude*", "LocalCache",
+                     "Roaming", "Claude", "claude-code", "*", "*", "claude.exe"),
         os.path.join(appdata, "Claude", "claude-code", "*", "claude.exe"),
+        os.path.join(appdata, "Claude", "claude-code", "*", "*", "claude.exe"),
     ]
     candidates = []
     for pattern in patterns:
         candidates.extend(glob.glob(pattern))
     if not candidates:
         raise FileNotFoundError(
-            "Could not find claude.exe under AppData\\Local\\Packages\\*Claude*\\"
-            "LocalCache\\Roaming\\Claude\\claude-code\\. Is the Claude desktop "
-            "app installed?"
+            "Could not find claude.exe under AppData\\Local\\Claude-Data\\*\\"
+            "claude-code\\. Is the Claude desktop app installed?"
         )
 
     def version_key(path: str):
-        version = os.path.basename(os.path.dirname(path))
+        # The version is the path component after "claude-code" -- not the
+        # folder above claude.exe, which is a hash in newer layouts.
+        norm = path.replace("/", "\\").split("\\")
+        version = ""
+        for i, part in enumerate(norm[:-1]):
+            if part.lower() == "claude-code" and i + 1 < len(norm) - 1:
+                version = norm[i + 1]
         parts = []
         for chunk in version.split("."):
             try:

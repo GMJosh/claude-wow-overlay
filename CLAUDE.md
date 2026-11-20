@@ -6,9 +6,9 @@ the player's character/location/quest log via a companion WoW addon, can
 look at screenshots, marks map locations, remembers settled facts per
 character, and checks for its own updates.
 
-Repo: https://github.com/BabyGrug/claude-wow-overlay (public, hosted under
-the `BabyGrug` org specifically so the owner's personal GitHub account never
-appears anywhere -- see **Privacy** below).
+Repo: https://github.com/GMJosh/claude-wow-overlay (public). Moved here from
+`BabyGrug/claude-wow-overlay` in v1.2.9 (the owner chose this after losing
+push access to the org) -- see **Privacy** below.
 
 ## Architecture
 
@@ -103,6 +103,13 @@ the visible text and turned into UI:
    externally-reachable copy is at
    `%LOCALAPPDATA%\Packages\*Claude*\LocalCache\Roaming\Claude\claude-code\<ver>\claude.exe`.
    `find_claude_exe()` searches both, preferring the real one.
+   **Update (v1.2.9):** newer desktop app builds moved it again, to
+   `%LOCALAPPDATA%\Claude-Data\<pkg>\claude-code\<ver>\<hash>\claude.exe`
+   (extra hash folder; neither older path exists). That made setup say it
+   couldn't detect Claude at all. `find_claude_exe()` (both files) now
+   searches this layout first, keeps the old ones as fallbacks, and sorts by
+   the path component *after* `claude-code` (the folder above claude.exe is
+   a hash now). Layouts keep shifting -- expect this to need revisiting.
 
 2. **`--append-system-prompt` only takes effect on the turn that CREATES a
    session (`--session-id`).** Every later `--resume` turn silently ignores
@@ -400,12 +407,15 @@ the visible text and turned into UI:
 
 ## Privacy
 
-Hosted under the `BabyGrug` GitHub **organization**, not the owner's
-personal account, specifically so the personal username never appears in
-the repo URL. Commit authorship is set to a generic identity for the same
-reason (`git config user.name/user.email`, repo-local only, not global).
-Don't reintroduce the real username anywhere -- commit messages, release
-notes, code comments, etc.
+Originally hosted under the `BabyGrug` org so no personal username showed
+in the repo URL; since v1.2.9 it lives under the owner's `GMJosh` account
+(their choice). `UPDATE_REPO` in `overlay.py` points here, so installs
+older than v1.2.9 (which poll `BabyGrug/...`) will NOT auto-update; they
+need a manual download of the new installer. Commit authorship is still a
+generic identity (`git config user.name/user.email`, repo-local only, not
+global) -- a fresh clone defaults to the global identity, so set it before
+the first commit. Don't put the owner's other personal usernames or email
+anywhere -- commit messages, release notes, code comments, etc.
 
 ## Known limitations / open items
 

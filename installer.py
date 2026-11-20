@@ -48,7 +48,7 @@ WINDOW_W, WINDOW_H = 560, 460
 
 # Bump alongside overlay.py's APP_VERSION -- shown in Windows' "Apps &
 # Features" listing via the registry uninstall entry (see register_uninstaller).
-INSTALLER_VERSION = "1.2.8"
+INSTALLER_VERSION = "1.2.9"
 
 UNINSTALL_REG_KEY = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\ClaudeWowOverlay"
 
@@ -70,9 +70,18 @@ def find_claude_exe():
     localappdata = os.environ.get("LOCALAPPDATA", "")
     appdata = os.environ.get("APPDATA", "")
     patterns = [
+        # Newer desktop app builds: ...\Claude-Data\<pkg>\claude-code\<ver>\<hash>\claude.exe
+        os.path.join(localappdata, "Claude-Data", "*", "claude-code", "*",
+                     "*", "claude.exe"),
+        os.path.join(localappdata, "Claude-Data", "*", "claude-code", "*",
+                     "claude.exe"),
+        # Older MSIX layouts
         os.path.join(localappdata, "Packages", "*Claude*", "LocalCache",
                      "Roaming", "Claude", "claude-code", "*", "claude.exe"),
+        os.path.join(localappdata, "Packages", "*Claude*", "LocalCache",
+                     "Roaming", "Claude", "claude-code", "*", "*", "claude.exe"),
         os.path.join(appdata, "Claude", "claude-code", "*", "claude.exe"),
+        os.path.join(appdata, "Claude", "claude-code", "*", "*", "claude.exe"),
     ]
     candidates = []
     for pattern in patterns:
@@ -81,7 +90,13 @@ def find_claude_exe():
         return None
 
     def version_key(path):
-        version = os.path.basename(os.path.dirname(path))
+        # The version is the path component after "claude-code" -- not the
+        # folder above claude.exe, which is a hash in newer layouts.
+        norm = path.replace("/", "\\").split("\\")
+        version = ""
+        for i, part in enumerate(norm[:-1]):
+            if part.lower() == "claude-code" and i + 1 < len(norm) - 1:
+                version = norm[i + 1]
         parts = []
         for chunk in version.split("."):
             try:
